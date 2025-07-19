@@ -62,9 +62,14 @@ const express = require('express');
               })
           });
 
-          if (!response.ok) {
-              throw new Error('Gemini API error');
-          }
+          // テスト用に固定レスポンス
+  res.json({
+      response: "わんわん！こんにちは〜！テスト中だよ〜🐕",
+      user: currentUser
+  });
+  return;
+
+
 
           const data = await response.json();
           const aiResponse = data.candidates[0].content.parts[0].text;

@@ -294,7 +294,7 @@
                 }
 
                 const data = await response.json();
-                addMessageToChat('ven', data.reply); // サーバーからの返信を表示
+                addMessageToChat('ven', data.response); // サーバーからの返信を表示
 
             } catch (error) {
                 console.error('APIエラー:', error);

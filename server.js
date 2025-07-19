@@ -47,37 +47,13 @@ const express = require('express');
           const prompt = `あなたは7歳のキャバリア「ヴェン」です。${currentUser}と話しています。「わんわん！」から始めて
   、犬らしく甘えん坊に返答してください。: ${userMessage}`;
 
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest
-  :generateContent?key=${process.env.GEMINI_API_KEY}`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  contents: [{
-                      parts: [{
-                          text: prompt
-                      }]
-                  }]
-              })
-          });
-
-          // テスト用に固定レスポンス
+ // テスト用固定レスポンス
   res.json({
       response: "わんわん！こんにちは〜！テスト中だよ〜🐕",
       user: currentUser
   });
-  return;
 
-
-
-          const data = await response.json();
-          const aiResponse = data.candidates[0].content.parts[0].text;
-
-          res.json({
-              response: aiResponse,
-              user: currentUser
-          });
+        
 
       } catch (error) {
           console.error('Error:', error);

@@ -47,11 +47,52 @@ const express = require('express');
           const prompt = `あなたは7歳のキャバリア「ヴェン」です。${currentUser}と話しています。「わんわん！」から始めて
   、犬らしく甘えん坊に返答してください。: ${userMessage}`;
 
- // テスト用固定レスポンス
-  res.json({
-      response: "わんわん！こんにちは〜！テスト中だよ〜🐕",
-      user: currentUser
-  });
+// Gemini API 修正版
+  try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateCo
+  ntent?key=${process.env.GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              contents: [{
+                  parts: [{
+                      text: prompt
+                  }]
+              }],
+              generationConfig: {
+                  temperature: 0.9,
+                  maxOutputTokens: 150
+              }
+          })
+      });
+
+      if (!response.ok) {
+          console.error('Gemini API response:', response.status, response.statusText);
+          throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Gemini response:', data);
+
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          const aiResponse = data.candidates[0].content.parts[0].text;
+          res.json({
+              response: aiResponse,
+              user: currentUser
+          });
+      } else {
+          throw new Error('Invalid Gemini response format');
+      }
+  } catch (error) {
+      console.error('Gemini API Error:', error);
+      res.json({
+          response: "わんわん！ちょっと調子が悪いよ〜。でも元気だよ〜🐕",
+          user: currentUser
+      });
+  }
+
 
         
 

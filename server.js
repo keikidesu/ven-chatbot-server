@@ -47,9 +47,10 @@ const express = require('express');
   + '...' : 'NOT_SET');
           console.log('Prompt:', prompt);
 
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${p
-  rocess.env.GEMINI_API_KEY}`;
-          console.log('Request URL:', url.substring(0, 100) + '...');
+ const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.e
+  nv.GEMINI_API_KEY}`;
+  console.log('Request URL:', url.substring(0, 100) + '...');
+
 
           const requestBody = {
               contents: [{

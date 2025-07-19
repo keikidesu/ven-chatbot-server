@@ -49,8 +49,8 @@ const express = require('express');
 
 // Gemini API 修正版
   try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateCo
-  ntent?key=${process.env.GEMINI_API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=
+  ${process.env.GEMINI_API_KEY}`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

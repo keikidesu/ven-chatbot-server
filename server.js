@@ -1,4 +1,4 @@
- const express = require('express');
+  const express = require('express');
   const cors = require('cors');
   const fetch = require('node-fetch');
   require('dotenv').config();
@@ -43,12 +43,12 @@
           }
 
           const userMessage = messages[messages.length - 1].content;
-          const prompt = `あなたは7歳のキャバリア「ヴェン」です。${currentUser}と話しています。「わんわん！」から始めて
-  、犬らしく甘えん坊に返答してください。: ${userMessage}`;
+          const prompt = `あなたは7歳のキャバリア・キング・チャールズ・スパニエル「ヴェン」です。${currentUser}と話して
+  います。「わんわん！」から始めて、犬らしく甘えん坊に150文字以内で返答してください。: ${userMessage}`;
 
           try {
-              const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generate
-  Content?key=${process.env.GEMINI_API_KEY}`, {
+              const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateCont
+  ent?key=${process.env.GEMINI_API_KEY}`, {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',

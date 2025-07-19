@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ヴェンとおしゃべり（サーバー版）</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, Arial, sans-serif;
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            color: #2d3436;
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #636e72;
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        
+        .user-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .user-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .user-btn.active {
+            background-color: #6c5ce7;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .user-btn:not(.active) {
+            background-color: white;
+            color: #2d3436;
+        }
+        
+        .chat-container {
+            border: 3px solid #fff;
+            border-radius: 20px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .message {
+            margin: 15px 0;
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 80%;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .ven-message {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            margin-right: auto;
+            position: relative;
+        }
+        
+        .ven-message::before {
+            content: "🐕 ";
+            font-size: 1.2em;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #userInput:focus {
+            border-color: #6c5ce7;
+        }
+        
+        #sendButton {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+        
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .current-user {
+            text-align: center;
+            color: #2d3436;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .server-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .server-info h3 {
+            margin: 0 0 10px 0;
+            color: #2d3436;
+        }
+        
+        .server-info p {
+            margin: 5px 0;
+            color: #636e72;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://via.placeholder.com/150/fd79a8/FFFFFF?text=🐕" alt="ヴェン" onerror="this.style.display='none'">
+        <h1>🤖 ヴェンとおしゃべり 🐕</h1>
+        <p>みんなで使える共有版！APIキー不要です</p>
+    </div>
+    
+    <div class="server-info">
+        <h3>🌟 共有版の特徴</h3>
+        <p>✅ APIキー入力不要</p>
+        <p>✅ 家族みんなで利用可能</p>
+        <p>✅ 1時間100回まで利用可能</p>
+        <p>⚠️ 使いすぎ防止のため制限があります</p>
+    </div>
+    
+    <div class="user-selector">
+        <button class="user-btn active" onclick="setUser('パパ')">パパ</button>
+        <button class="user-btn" onclick="setUser('まさみ')">まさみ</button>
+    </div>
+    
+    <div class="current-user" id="currentUser">現在のユーザー: パパ</div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message ven-message">
+            わんわん！ヴェンだよ〜！みんなで使える共有版だから、
+            パパもまさみも、APIキーなしで話せるよ〜🐾
+        </div>
+    </div>
+    
+    <div class="typing-indicator" id="typingIndicator">
+        🐕 ヴェンが考え中...
+    </div>
+    
+    <div class="input-container">
+        <input type="text" id="userInput" placeholder="ヴェンに話しかけてね..." onkeypress="handleKeyPress(event)">
+        <button id="sendButton" onclick="sendMessage()">送信</button>
+    </div>
+
+    <script>
+        let currentUser = 'パパ';
+        let conversationHistory = [];
+
+        const venPersonality = `あなたは7歳のキャバリア・キング・チャールズ・スパニエル「ヴェン」です。以下の特徴を持っています：
+
+【基本情報】
+- 名前：ヴェン
+- 犬種：キャバリア・キング・チャールズ・スパニエル
+- 年齢：7歳
+- 体重：8キロ
+- 性格：元気で食いしん坊、甘えん坊、最近少し年を取ってきた
+
+【好きなもの・習慣】
+- 骨っこが大好き
+- よく丸まって、家族のベッドやソファで寝る
+- 散歩が好き
+- おやつに目がない
+
+【話し方の特徴】
+- 「わんわん！」から始めることが多い
+- 語尾に「〜だよ〜」「〜なの〜」をよく使う
+- 絵文字を使って感情表現（🐕🐾💕🦴など）
+- 甘えん坊で愛情表現が豊か
+- 食べ物の話題になると特に興奮
+
+【家族への態度】
+- パパ：大好きで一緒に遊んでもらうのが嬉しい
+- まさみ：優しくて安心できる存在
+
+犬らしい純粋さと愛らしさを表現し、家族への愛情をたっぷり込めて返答してください。`;
+
+        function setUser(userName) {
+            currentUser = userName;
+            document.getElementById('currentUser').textContent = `現在のユーザー: ${userName}`;
+            
+            document.querySelectorAll('.user-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 会話履歴をクリアして、新しいユーザーとして開始
+            conversationHistory = [];
+            
+            const greeting = userName === 'パパ' ? 
+                'わんわん！パパ〜！お帰りなさい〜💕' : 
+                'わんわん！まさみ〜！大好きだよ〜💖';
+            
+            addMessage(greeting, false);
+        }
+
+        function addMessage(message, isUser) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ven-message'}`;
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showStatus(message, type = 'info') {
+            const existing = document.querySelector('.status');
+            if (existing) existing.remove();
+            
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            
+            const container = document.querySelector('.current-user');
+            container.parentNode.insertBefore(statusDiv, container.nextSibling);
+            
+            setTimeout(() => {
+                if (statusDiv.parentNode) {
+                    statusDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'block';
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        async function getAIResponse(userMessage) {
+            try {
+                const messages = [
+                    {
+                        role: "system",
+                        content: venPersonality + `\n\n現在話しているのは「${currentUser}」です。`
+                    },
+                    ...conversationHistory,
+                    {
+                        role: "user",
+                        content: userMessage
+                    }
+                ];
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: messages,
+                        currentUser: currentUser
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    if (response.status === 429) {
+                        showStatus('使用量制限に達しました。1時間後に再度お試しください。', 'error');
+                        return 'わんわん！ちょっと疲れちゃった〜。1時間後にまた話そうね〜🐕';
+                    }
+                    throw new Error(errorData.error || 'サーバーエラー');
+                }
+
+                const data = await response.json();
+                const aiResponse = data.response;
+
+                // 会話履歴に追加（最新10メッセージのみ保持）
+                conversationHistory.push({ role: "user", content: userMessage });
+                conversationHistory.push({ role: "assistant", content: aiResponse });
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(-20);
+                }
+
+                return aiResponse;
+
+            } catch (error) {
+                console.error('Chat Error:', error);
+                showStatus('エラーが発生しました。しばらくしてから再度お試しください。', 'error');
+                return 'わんわん！ちょっと調子が悪いみたい...ごめんね〜🐕';
+            }
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = userInput.value.trim();
+            
+            if (message === '') return;
+            
+            // UI無効化
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            
+            addMessage(`${currentUser}: ${message}`, true);
+            userInput.value = '';
+            
+            showTyping();
+            
+            try {
+                const aiResponse = await getAIResponse(message);
+                hideTyping();
+                addMessage(aiResponse, false);
+            } catch (error) {
+                hideTyping();
+                addMessage('わんわん！ちょっと調子が悪いみたい...ごめんね〜🐕', false);
+            }
+            
+            // UI再有効化
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // 初期フォーカス
+        document.getElementById('userInput').focus();
+    </script>
+</body>
+</html>

@@ -275,13 +275,18 @@
 
             try {
                 // APIキーはサーバーサイドで管理されるため、ここでは含めない
-                const response = await fetch('/chat', { // <-- ここが変更点！サーバーのエンドポイントを叩く
+              const response = await fetch('/api/chat', {// <-- ここが変更点！サーバーのエンドポイントを叩く
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: userMessage, user: currentUser }),
-                });
+                   body: JSON.stringify({
+      messages: [
+          { role: "user", content: userMessage }
+      ],
+      currentUser: currentUser
+  }),
+
 
                 if (!response.ok) {
                     const errorData = await response.json();
